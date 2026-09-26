@@ -4,6 +4,9 @@
 
 package io.airbyte.integrations.destination.s3_v2
 
+import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.JsonPropertyDescription
 import com.kjetland.jackson.jsonSchema.annotations.JsonSchemaInject
 import com.kjetland.jackson.jsonSchema.annotations.JsonSchemaTitle
 import io.airbyte.cdk.command.ConfigurationSpecification
@@ -12,6 +15,7 @@ import io.airbyte.cdk.load.command.aws.AWSArnRoleSpecification
 import io.airbyte.cdk.load.command.object_storage.DeprecatedJsonFormatSpecification
 import io.airbyte.cdk.load.command.object_storage.DeprecatedObjectStorageFormatSpecification
 import io.airbyte.cdk.load.command.object_storage.DeprecatedObjectStorageFormatSpecificationProvider
+import io.airbyte.cdk.load.command.s3.S3AddressingStyle
 import io.airbyte.cdk.load.command.s3.S3BucketRegion
 import io.airbyte.cdk.load.command.s3.S3BucketSpecification
 import io.airbyte.cdk.load.command.s3.S3PathSpecification
@@ -64,15 +68,24 @@ class S3V2Specification :
     @get:JsonSchemaInject(json = """{"examples":["http://localhost:9000"],"order":7}""")
     override val s3Endpoint: String? = null
 
+    @get:JsonIgnore(false)
+    @get:JsonSchemaTitle("S3 Addressing Style")
+    @get:JsonPropertyDescription(
+        "Controls how the bucket name is sent to S3-compatible storage. Path style places the bucket name in the URL path. Virtual-hosted style places the bucket name in the hostname."
+    )
+    @get:JsonProperty("s3_addressing_style", defaultValue = "path_style")
+    @get:JsonSchemaInject(json = """{"order":8,"default":"path_style"}""")
+    override val s3AddressingStyle: S3AddressingStyle? = S3AddressingStyle.PATH_STYLE
+
     @get:JsonSchemaInject(
         json =
-            "{\"examples\":[\"\${NAMESPACE}/\${STREAM_NAME}/\${YEAR}_\${MONTH}_\${DAY}_\${EPOCH}_\"],\"order\":8}"
+            "{\"examples\":[\"\${NAMESPACE}/\${STREAM_NAME}/\${YEAR}_\${MONTH}_\${DAY}_\${EPOCH}_\"],\"order\":9}"
     )
     override val s3PathFormat: String? = null
 
     @get:JsonSchemaInject(
         json =
-            "{\"examples\":[\"{date}\",\"{date:yyyy_MM}\",\"{timestamp}\",\"{part_number}\",\"{sync_id}\"],\"order\":9}"
+            "{\"examples\":[\"{date}\",\"{date:yyyy_MM}\",\"{timestamp}\",\"{part_number}\",\"{sync_id}\"],\"order\":10}"
     )
     override val fileNamePattern: String? = null
 }
